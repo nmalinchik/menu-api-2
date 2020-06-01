@@ -1,9 +1,10 @@
 package ru.mallin.menuapi2.controllers;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.mallin.menuapi2.entity.Measure;
 import ru.mallin.menuapi2.repos.MeasureRepo;
+
+import java.util.List;
 
 @RestController
 public class MeasureController {
@@ -15,8 +16,18 @@ public class MeasureController {
     }
 
     @GetMapping("/measures")
-    public Iterable<Measure> getMeasures(){
-        return repo.findAll();
+    public List<Measure> getMeasures(){
+        return (List<Measure>) repo.findAll();
+    }
+
+    @GetMapping("/measures/{id}")
+    public Measure getMeasureById(@PathVariable long id){
+        return repo.findById(id).orElse(null);
+    }
+
+    @PostMapping("/measures/add")
+    public Measure saveMeasure(@RequestBody Measure measure){
+        return repo.save(measure);
     }
 
 }

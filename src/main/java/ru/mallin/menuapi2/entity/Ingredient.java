@@ -1,9 +1,16 @@
 package ru.mallin.menuapi2.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "ingredients")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Ingredient {
 
     @Id
@@ -12,10 +19,8 @@ public class Ingredient {
 
     private String title;
     @ManyToOne
-    @JoinColumn(name = "type_id")
     private Type type;
     @ManyToOne
-    @JoinColumn(name = "measure_id")
     private Measure measure;
     private double amount;
 
