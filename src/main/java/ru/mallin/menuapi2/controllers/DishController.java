@@ -24,7 +24,7 @@ public class DishController {
         return repo.findAll();
     }
 
-    @GetMapping("/dishes/{category_id}")
+    @GetMapping("/dishes/by-category/{category_id}")
     public Iterable<Dish> findByCategory(@PathVariable long category_id){
         return repo.findByCategory(categoryRepo.findById(category_id).orElse(null));
     }
@@ -68,7 +68,7 @@ public class DishController {
     }
 
     @DeleteMapping("/dishes/{typeId}")
-    void deleteDish(@PathVariable Long id) {
+    public void deleteDish(@PathVariable Long id) {
         repo.deleteById(id);
     }
 

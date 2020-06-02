@@ -5,7 +5,13 @@ import ru.mallin.menuapi2.entity.Ingredient;
 import ru.mallin.menuapi2.repos.IngredientRepo;
 import ru.mallin.menuapi2.repos.TypeRepo;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @RestController
+@CrossOrigin("*")
 public class IngredientController {
 
     private final IngredientRepo repo;
@@ -17,13 +23,32 @@ public class IngredientController {
     }
 
     @GetMapping("/ingredients")
-    public Iterable<Ingredient> getAll(){
-        return repo.findAll();
+    public List<Ingredient> getAll(){
+        return (List<Ingredient>) repo.findAll();
     }
 
-    @GetMapping("/ingredients/{typeId}")
-    public Iterable<Ingredient> getAllByType(@PathVariable long typeId){
+    @GetMapping("/ingredients/{id}")
+    public Ingredient getIngredientById(@PathVariable long id){
+        return repo.findById(id).orElse(null);
+    }
+
+    @GetMapping("/ingredients/by-type/{typeId}")
+    public List<Ingredient> getAllByType(@PathVariable long typeId){
         return repo.findByType(typeRepo.findById(typeId).orElse(null));
+    }
+
+    @GetMapping("/ingredients/by-dish/{dishId}")
+    public List<Ingredient> getAllByDishId(@PathVariable long dishId){
+        List<Ingredient> all = (List<Ingredient>) repo.findAll();
+        System.out.println();
+        System.out.println("================================ dish id = " + dishId);
+        System.out.println();
+        List<Ingredient> collect = all
+                .stream()
+                .filter(ingredient -> ingredient.getDish().getId() == dishId)
+                .collect(Collectors.toList());
+        collect.forEach(System.out::println);
+        return collect;
     }
 
     @PostMapping("/ingredients/add")
@@ -33,12 +58,14 @@ public class IngredientController {
 
     @PutMapping("/ingredients/{id}")
     public Ingredient replaceIngredient(@RequestBody Ingredient newIngredient, @PathVariable Long id) {
+        System.out.println();
+        System.out.println("================================ UPDATE");
+        System.out.println();
         return repo.findById(id)
                 .map(ingredient -> {
                     ingredient.setTitle(newIngredient.getTitle());
                     ingredient.setMeasure(newIngredient.getMeasure());
                     ingredient.setType(newIngredient.getType());
-                    ingredient.setDish(newIngredient.getDish());
                     ingredient.setAmount(newIngredient.getAmount());
                     return repo.save(ingredient);
                 })
@@ -48,9 +75,13 @@ public class IngredientController {
                 });
     }
 
-    @DeleteMapping("/ingredients/{typeId}")
-    void deleteIngredient(@PathVariable Long id) {
+    @DeleteMapping("/ingredients/delete/{id}")
+    public Map<String, Boolean> deleteIngredient(@PathVariable Long id) {
+        System.out.println("delete " + id);
         repo.deleteById(id);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("deleted", Boolean.TRUE);
+        return response;
     }
 
 
