@@ -40,9 +40,6 @@ public class IngredientController {
     @GetMapping("/ingredients/by-dish/{dishId}")
     public List<Ingredient> getAllByDishId(@PathVariable long dishId){
         List<Ingredient> all = (List<Ingredient>) repo.findAll();
-        System.out.println();
-        System.out.println("================================ dish id = " + dishId);
-        System.out.println();
         List<Ingredient> collect = all
                 .stream()
                 .filter(ingredient -> ingredient.getDish().getId() == dishId)
@@ -58,9 +55,6 @@ public class IngredientController {
 
     @PutMapping("/ingredients/{id}")
     public Ingredient replaceIngredient(@RequestBody Ingredient newIngredient, @PathVariable Long id) {
-        System.out.println();
-        System.out.println("================================ UPDATE");
-        System.out.println();
         return repo.findById(id)
                 .map(ingredient -> {
                     ingredient.setTitle(newIngredient.getTitle());
@@ -77,7 +71,6 @@ public class IngredientController {
 
     @DeleteMapping("/ingredients/delete/{id}")
     public Map<String, Boolean> deleteIngredient(@PathVariable Long id) {
-        System.out.println("delete " + id);
         repo.deleteById(id);
         Map<String, Boolean> response = new HashMap<>();
         response.put("deleted", Boolean.TRUE);

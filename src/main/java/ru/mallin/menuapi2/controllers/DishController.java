@@ -20,13 +20,22 @@ public class DishController {
     }
 
     @GetMapping("/dishes")
-    public Iterable<Dish> getAll(){
-        return repo.findAll();
+    public List<Dish> getAll(){
+        return (List<Dish>) repo.findAll();
     }
 
     @GetMapping("/dishes/by-category/{category_id}")
-    public Iterable<Dish> findByCategory(@PathVariable long category_id){
-        return repo.findByCategory(categoryRepo.findById(category_id).orElse(null));
+    public List<Dish> findByCategory(@PathVariable long category_id){
+        return (List<Dish>) repo.findByCategory(categoryRepo.findById(category_id).orElse(null));
+    }
+
+    @GetMapping("/dishes/by-title/{title}")
+    public List<Dish> findByTitle(@PathVariable String title){
+        List<Dish> all = (List<Dish>) repo.findAll();
+        return all
+                .stream()
+                .filter(d -> d.getTitle().toUpperCase().contains(title.toUpperCase()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/dishes/{id}")
@@ -34,8 +43,8 @@ public class DishController {
         return repo.findById(id).orElse(null);
     }
 
-    @GetMapping("/dishes/{category_id}/{title}")
-    public Iterable<Dish> findByCategory(@PathVariable long category_id, @PathVariable String title){
+    @GetMapping("/dishes/by-cat-and-title/{category_id}/{title}")
+    public List<Dish> findByCategoryAndByTitle(@PathVariable long category_id, @PathVariable String title){
         List<Dish> searchedDishes = (List<Dish>) repo.findByCategory(categoryRepo.findById(category_id).orElse(null));
         if (title != null && !title.isEmpty()){
            searchedDishes = searchedDishes.stream().filter(dish -> dish.getTitle().toUpperCase().contains(title.toUpperCase())).collect(Collectors.toList());
