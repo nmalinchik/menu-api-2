@@ -52,4 +52,19 @@ public class Dish {
     public int hashCode() {
         return Objects.hash(id, title, category, cookingTime, daysCount, recipe, cookedLastTime, recipeUrl);
     }
+
+    @Override
+    public String toString() {
+        return "Dish{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", category=" + category +
+                ", cookingTime=" + cookingTime +
+                ", daysCount=" + daysCount +
+                ", recipe='" + recipe + '\'' +
+                ", cookedLastTime=" + cookedLastTime +
+                ", recipeUrl='" + recipeUrl + '\'' +
+                ", ingredients=" + ingredients +
+                '}';
+    }
 }
