@@ -2,7 +2,6 @@ package ru.mallin.menuapi2.controllers;
 
 import org.springframework.web.bind.annotation.*;
 import ru.mallin.menuapi2.entity.Dish;
-import ru.mallin.menuapi2.entity.Ingredient;
 import ru.mallin.menuapi2.repos.CategoryRepo;
 import ru.mallin.menuapi2.repos.DishRepo;
 import ru.mallin.menuapi2.repos.IngredientRepo;
@@ -10,7 +9,6 @@ import ru.mallin.menuapi2.repos.IngredientRepo;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController

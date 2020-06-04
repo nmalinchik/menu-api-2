@@ -33,6 +33,13 @@ public class Dish {
     @JsonBackReference
     private Set<Ingredient> ingredients = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "oneday_dishes",
+            joinColumns = @JoinColumn(name = "dishes_id"),
+            inverseJoinColumns = @JoinColumn(name = "one_day_id"))
+    @JsonBackReference
+    private Set<OneDay> oneDays = new HashSet<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
