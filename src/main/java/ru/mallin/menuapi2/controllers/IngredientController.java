@@ -1,13 +1,15 @@
 package ru.mallin.menuapi2.controllers;
 
 import org.springframework.web.bind.annotation.*;
+import ru.mallin.menuapi2.entity.Dish;
 import ru.mallin.menuapi2.entity.Ingredient;
+import ru.mallin.menuapi2.entity.OneDay;
 import ru.mallin.menuapi2.repos.IngredientRepo;
+import ru.mallin.menuapi2.repos.OneDayRepo;
 import ru.mallin.menuapi2.repos.TypeRepo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -16,10 +18,12 @@ public class IngredientController {
 
     private final IngredientRepo repo;
     private final TypeRepo typeRepo;
+    private final OneDayRepo oneDayRepo;
 
-    public IngredientController(IngredientRepo repo, TypeRepo typeRepo) {
+    public IngredientController(IngredientRepo repo, TypeRepo typeRepo, OneDayRepo oneDayRepo) {
         this.repo = repo;
         this.typeRepo = typeRepo;
+        this.oneDayRepo = oneDayRepo;
     }
 
     @GetMapping("/ingredients")
@@ -46,6 +50,30 @@ public class IngredientController {
                 .collect(Collectors.toList());
         collect.forEach(System.out::println);
         return collect;
+    }
+
+    @GetMapping("/ingredients/for-shopping-list/{from}")
+    public List<Ingredient> getShoppingList(@PathVariable String from){
+        LocalDate start = LocalDate.parse(from);
+        LocalDate end = start.plusDays(6);
+        List<OneDay> all = (List<OneDay>) oneDayRepo.findAll();
+        all = all.stream()
+                .filter(d -> (d.getDate().isAfter(start) || d.getDate().isEqual(start)) && (d.getDate().isBefore(end) || d.getDate().isEqual(end)))
+                .collect(Collectors.toList());
+        Map<String, Ingredient> ingredientMap = new HashMap<>();
+        for (OneDay oneDay : all){
+            for(Dish dish : oneDay.getDishes()){
+                for (Ingredient ingredient : dish.getIngredients()){
+                    if  (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНО")){
+                        ingredientMap.merge(ingredient.getTitle().toLowerCase(), ingredient, (oldVal, newVal) -> {
+                            oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
+                            return oldVal;
+                        });
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(ingredientMap.values());
     }
 
     @PostMapping("/ingredients/add")
