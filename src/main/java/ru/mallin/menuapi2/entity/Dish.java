@@ -1,6 +1,7 @@
 package ru.mallin.menuapi2.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -37,7 +38,7 @@ public class Dish {
     @JoinTable(name = "oneday_dishes",
             joinColumns = @JoinColumn(name = "dishes_id"),
             inverseJoinColumns = @JoinColumn(name = "one_day_id"))
-    @JsonBackReference
+    @JsonIdentityReference
     private Set<OneDay> oneDays = new HashSet<>();
 
     @Override

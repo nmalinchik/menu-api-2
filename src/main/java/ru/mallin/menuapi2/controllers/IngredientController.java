@@ -27,22 +27,22 @@ public class IngredientController {
     }
 
     @GetMapping("/ingredients")
-    public List<Ingredient> getAll(){
+    public List<Ingredient> getAll() {
         return (List<Ingredient>) repo.findAll();
     }
 
     @GetMapping("/ingredients/{id}")
-    public Ingredient getIngredientById(@PathVariable long id){
+    public Ingredient getIngredientById(@PathVariable long id) {
         return repo.findById(id).orElse(null);
     }
 
     @GetMapping("/ingredients/by-type/{typeId}")
-    public List<Ingredient> getAllByType(@PathVariable long typeId){
+    public List<Ingredient> getAllByType(@PathVariable long typeId) {
         return repo.findByType(typeRepo.findById(typeId).orElse(null));
     }
 
     @GetMapping("/ingredients/by-dish/{dishId}")
-    public List<Ingredient> getAllByDishId(@PathVariable long dishId){
+    public List<Ingredient> getAllByDishId(@PathVariable long dishId) {
         List<Ingredient> all = (List<Ingredient>) repo.findAll();
         List<Ingredient> collect = all
                 .stream()
@@ -53,7 +53,7 @@ public class IngredientController {
     }
 
     @GetMapping("/ingredients/for-shopping-list/{from}")
-    public List<Ingredient> getShoppingList(@PathVariable String from){
+    public List<Ingredient> getShoppingList(@PathVariable String from) {
         LocalDate start = LocalDate.parse(from);
         LocalDate end = start.plusDays(6);
         List<OneDay> all = (List<OneDay>) oneDayRepo.findAll();
@@ -61,15 +61,17 @@ public class IngredientController {
                 .filter(d -> (d.getDate().isAfter(start) || d.getDate().isEqual(start)) && (d.getDate().isBefore(end) || d.getDate().isEqual(end)))
                 .collect(Collectors.toList());
         Map<String, Ingredient> ingredientMap = new HashMap<>();
-        for (OneDay oneDay : all){
-            for(Dish dish : oneDay.getDishes()){
-                for (Ingredient ingredient : dish.getIngredients()){
-                    if  (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНО")){
-                        ingredientMap.merge(ingredient.getTitle().toLowerCase(), ingredient, (oldVal, newVal) -> {
-                            oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
-                            return oldVal;
-                        });
-                    }
+        Set<Dish> dishSet = new HashSet<>();
+        for (OneDay oneDay : all) {
+            dishSet.addAll(oneDay.getDishes());
+        }
+        for (Dish dish : dishSet) {
+            for (Ingredient ingredient : dish.getIngredients()) {
+                if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНО")) {
+                    ingredientMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(), ingredient, (oldVal, newVal) -> {
+                        oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
+                        return oldVal;
+                    });
                 }
             }
         }
@@ -77,7 +79,7 @@ public class IngredientController {
     }
 
     @PostMapping("/ingredients/add")
-    public Ingredient saveIngredient(@RequestBody Ingredient ingredient){
+    public Ingredient saveIngredient(@RequestBody Ingredient ingredient) {
         return repo.save(ingredient);
     }
 

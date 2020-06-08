@@ -71,14 +71,19 @@ public class DishController {
 
     @PostMapping("/dishes/add")
     public Dish saveDish(@RequestBody Dish dish){
+        System.out.println(dish);
         if (dish.getIngredients() == null){
             dish.setIngredients(new HashSet<>());
+        }
+        if (dish.getOneDays() == null) {
+            dish.setOneDays(new HashSet<>());
         }
         return repo.save(dish);
     }
 
     @PutMapping("/dishes/{id}")
     public Dish updateDish(@RequestBody Dish newDish, @PathVariable Long id) {
+        System.out.println(newDish);
         return repo.findById(id)
                 .map(dish -> {
                     dish.setTitle(newDish.getTitle());
