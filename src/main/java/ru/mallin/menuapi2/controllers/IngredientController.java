@@ -67,7 +67,7 @@ public class IngredientController {
         }
         for (Dish dish : dishSet) {
             for (Ingredient ingredient : dish.getIngredients()) {
-                if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНО")) {
+                if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНОЕ")) {
                     ingredientMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(), ingredient, (oldVal, newVal) -> {
                         oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
                         return oldVal;
