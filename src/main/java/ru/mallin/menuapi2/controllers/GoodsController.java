@@ -1,11 +1,16 @@
 package ru.mallin.menuapi2.controllers;
 
+import lombok.Cleanup;
+import lombok.SneakyThrows;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.web.bind.annotation.*;
 import ru.mallin.menuapi2.entity.Good;
 import ru.mallin.menuapi2.entity.Shopping;
 import ru.mallin.menuapi2.repos.GoodRepo;
 import ru.mallin.menuapi2.repos.ShoppingListRepo;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -35,6 +40,38 @@ public class GoodsController {
                 (shopping.getEndPeriod().isAfter(currentDate) || shopping.getEndPeriod().isEqual(currentDate)))
                 .findFirst();
         List<Good> notSortedList = repo.findByShopping(first.get());
+        return sortShoppingList(notSortedList);
+    }
+
+    @SneakyThrows
+    @RequestMapping(value = "/goods/shopping-list-by-date/{date}", method = RequestMethod.GET)
+    public void getFile(@PathVariable String date, HttpServletResponse response) {
+        LocalDate currentDate = LocalDate.parse(date);
+        List<Shopping> all = (List<Shopping>) shoppingRepo.findAll();
+        Optional<Shopping> first = all.stream().filter(shopping -> (shopping.getStartPeriod().isBefore(currentDate) || shopping.getStartPeriod().isEqual(currentDate)) &&
+                (shopping.getEndPeriod().isAfter(currentDate) || shopping.getEndPeriod().isEqual(currentDate)))
+                .findFirst();
+        List<Good> notSortedList = repo.findByShopping(first.get());
+        List<Good> goods = sortShoppingList(notSortedList);
+        File txtFile = new File("C:\\work\\menu\\shopping-lists\\"+"list-"+ date+".txt");
+        FileWriter fw = new FileWriter(txtFile);
+        for (Good good : goods){
+            fw.write(good.getTitle() + " " + good.getAmount() + " " + good.getMeasure() + "\n");
+            fw.flush();
+        }
+        fw.close();
+        try {
+            // get your file as InputStream
+            InputStream is = new FileInputStream(txtFile);
+            // copy it to response's OutputStream
+            IOUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+    }
+
+    private List<Good> sortShoppingList(List<Good> notSortedList) {
         List<Good> sortedList = new ArrayList<>();
         Map<String, List<Good>> map = new HashMap<>();
         map.put("ЯЙЦО", new ArrayList<>());

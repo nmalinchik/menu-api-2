@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.mallin.menuapi2.entity.*;
 import ru.mallin.menuapi2.repos.OneDayRepo;
 import ru.mallin.menuapi2.repos.ShoppingListRepo;
+import ru.mallin.menuapi2.util.Util;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -54,23 +55,27 @@ public class ShoppingController {
         for (OneDay oneDay : all) {
             dishSet.addAll(oneDay.getDishes());
         }
-        for (Dish dish : dishSet) {
-            for (Ingredient ingredient : dish.getIngredients()) {
+        List<Ingredient> allIngredients = new ArrayList<>();
 
-                if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНОЕ")) {
-                    ingredientMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(), ingredient, (oldVal, newVal) -> {
-                        oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
-                        return oldVal;
-                    });
-                } else {
-                    System.out.println(ingredient);
-                }
+        for (Dish dish : dishSet) {
+            allIngredients.addAll(dish.getIngredients());
+        }
+//
+//        Util util = new Util();
+//        util.convertIngredientValuesToOneType(allIngredients);
+
+        for (Ingredient ingredient : allIngredients) {
+            if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНОЕ")) {
+                ingredientMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(), ingredient, (oldVal, newVal) -> {
+                    oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
+                    return oldVal;
+                });
             }
         }
 
         Set<Good> goodSet = new HashSet<>();
 
-        for (Ingredient ingredient : ingredientMap.values()){
+        for (Ingredient ingredient : ingredientMap.values()) {
             goodSet.add(new Good(ingredient.getTitle(), ingredient.getType().getTitle(), ingredient.getMeasure().getTitle(), ingredient.getAmount(), newShopping));
         }
 
@@ -83,4 +88,7 @@ public class ShoppingController {
     public void deleteShopping(@PathVariable Long id) {
         repo.deleteById(id);
     }
+
+
+
 }
