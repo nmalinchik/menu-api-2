@@ -50,7 +50,7 @@ public class ShoppingController {
         all = all.stream()
                 .filter(d -> (d.getDate().isAfter(start) || d.getDate().isEqual(start)) && (d.getDate().isBefore(end) || d.getDate().isEqual(end)))
                 .collect(Collectors.toList());
-        Map<String, Ingredient> ingredientMap = new HashMap<>();
+        Map<String, Good> goodsMap = new HashMap<>();
         Set<Dish> dishSet = new HashSet<>();
         for (OneDay oneDay : all) {
             dishSet.addAll(oneDay.getDishes());
@@ -60,24 +60,19 @@ public class ShoppingController {
         for (Dish dish : dishSet) {
             allIngredients.addAll(dish.getIngredients());
         }
-//
-//        Util util = new Util();
-//        util.convertIngredientValuesToOneType(allIngredients);
 
         for (Ingredient ingredient : allIngredients) {
             if (!ingredient.getType().getTitle().equalsIgnoreCase("БЕСПЛАТНОЕ")) {
-                ingredientMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(), ingredient, (oldVal, newVal) -> {
+                goodsMap.merge(ingredient.getTitle().toLowerCase() + "-" + ingredient.getMeasure().getTitle(),
+                        new Good(ingredient.getTitle(), ingredient.getType().getTitle(), ingredient.getMeasure().getTitle(), ingredient.getAmount(), newShopping),
+                        (oldVal, newVal) -> {
                     oldVal.setAmount(oldVal.getAmount() + newVal.getAmount());
                     return oldVal;
                 });
             }
         }
 
-        Set<Good> goodSet = new HashSet<>();
-
-        for (Ingredient ingredient : ingredientMap.values()) {
-            goodSet.add(new Good(ingredient.getTitle(), ingredient.getType().getTitle(), ingredient.getMeasure().getTitle(), ingredient.getAmount(), newShopping));
-        }
+        Set<Good> goodSet = new HashSet<>(goodsMap.values());
 
         newShopping.setGoods(goodSet);
         return repo.save(newShopping);
